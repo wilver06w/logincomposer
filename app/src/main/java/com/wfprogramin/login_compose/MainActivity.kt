@@ -17,14 +17,6 @@ import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-
-
-    private fun getVideoUri(): Uri {
-        val rawId = resources.getIdentifier("clouds", "raw", packageName)
-        val videoUri = "android.resource://$packageName/$rawId"
-        return Uri.parse(videoUri)
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -34,7 +26,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    AppNavigation(getVideoUri())
+                    AppNavigation()
                 }
             }
         }

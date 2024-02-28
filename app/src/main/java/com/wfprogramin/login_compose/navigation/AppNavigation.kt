@@ -9,15 +9,12 @@ import com.wfprogramin.login_compose.ui.login.ui.view.Login
 import com.wfprogramin.mvvmcomposewr.navigation.AppScreens
 
 @Composable
-fun AppNavigation(uri: Uri) {
+fun AppNavigation() {
 
     val navController = rememberNavController()
     NavHost(navController = navController, startDestination = AppScreens.FirstScreen.route){
         composable(route = AppScreens.FirstScreen.route){
-            Login(uri)
+            Login()
         }
-//        composable(route = AppScreens.SecondScreen.route){
-//            WelcomeScreenTwo(navController)
-//        }
     }
 }
