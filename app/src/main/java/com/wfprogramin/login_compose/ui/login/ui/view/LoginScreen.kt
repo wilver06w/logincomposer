@@ -37,13 +37,13 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.google.accompanist.insets.ProvideWindowInsets
 import com.google.accompanist.insets.navigationBarsWithImePadding
 import com.wfprogramin.login_compose.R
+import com.wfprogramin.login_compose.ui.login.ui.LoginUIState
 import com.wfprogramin.login_compose.ui.login.ui.viewmodel.LoginViewModel
 import com.wfprogramin.login_compose.ui.theme.Shapes
 import com.wfprogramin.login_compose.util.BasicValues
@@ -66,102 +66,135 @@ fun Login(quoteViewModel: LoginViewModel = hiltViewModel()) {
     val coroutineScope = rememberCoroutineScope()
 
     LaunchedEffect(Unit) {
-        quoteViewModel
-            .toastMessage
-            .collect { message ->
-                Toast.makeText(
-                    context,
-                    message,
-                    Toast.LENGTH_SHORT,
-                ).show()
+        quoteViewModel.toastMessage.collect { message ->
+            Toast.makeText(
+                context,
+                message,
+                Toast.LENGTH_SHORT,
+            ).show()
+        }
+
+    }
+    LaunchedEffect(Unit) {
+        quoteViewModel.uiState.collect { uiState ->
+            when (uiState) {
+                is LoginUIState.Error -> {
+                    Toast.makeText(
+                        context,
+
+                        uiState.msg,
+                        Toast.LENGTH_SHORT,
+                    ).show()
+                }
+
+                is LoginUIState.Success -> {
+                    Toast.makeText(
+                        context,
+                        BasicValues.signSuccess,
+                        Toast.LENGTH_SHORT,
+                    ).show()
+                }
+
+                else -> {}
             }
+        }
+
     }
 
 
-    if (isLoading) {
-        Box(Modifier.fillMaxSize()) {
-            CircularProgressIndicator(Modifier.align(Alignment.Center))
+    ProvideWindowInsets {
+        Box(modifier = Modifier.fillMaxSize()) {
+            Image(
+                painter = painterResource(id = R.drawable.nubes),
+                "Background",
+                contentScale = ContentScale.FillHeight,
+                modifier = Modifier.matchParentSize(),
+            )
         }
-    } else {
-        ProvideWindowInsets {
-            Box(modifier = Modifier.fillMaxSize()) {
-                Image(
-                    painter = painterResource(id = R.drawable.nubes),
-                    "Background",
-                    contentScale = ContentScale.FillHeight,
-                    modifier = Modifier.matchParentSize(),
-                )
-            }
-            Column(
-                Modifier
-                    .navigationBarsWithImePadding()
-                    .padding(24.dp)
-                    .fillMaxSize(),
-                verticalArrangement = Arrangement.spacedBy(16.dp, alignment = Alignment.Bottom),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text(
-                    BasicValues.welcome, color = Color.White, fontSize = 28.sp,
-                    modifier = Modifier
-                        .offset(
-                            x = 2.dp,
-                            y = 2.dp
-                        )
-                        .alpha(0.75f)
-                )
-                Spacer(
-                    modifier = Modifier.height(
-                        10 .dp
+        Column(
+            Modifier
+                .navigationBarsWithImePadding()
+                .padding(24.dp)
+                .fillMaxSize(),
+            verticalArrangement = Arrangement.spacedBy(16.dp, alignment = Alignment.Bottom),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                BasicValues.welcome,
+                color = Color.White,
+                fontSize = 28.sp,
+                modifier = Modifier
+                    .offset(
+                        x = 2.dp, y = 2.dp
                     )
+                    .alpha(0.75f)
+            )
+            Spacer(
+                modifier = Modifier.height(
+                    10.dp
                 )
-                TextInput(
-                    value = email,
-                    InputTypeInfo.Name,
-                    keyboardActions = KeyboardActions(onNext = {
-                        passwordFocusRequester.requestFocus()
-                    }),
-                    onTextFieldChange = {
-                        quoteViewModel.onLoginChanged(
-                            email = it,
-                            password = password
-                        )
-                    },
-                )
-                TextInput(
-                    value = password,
-                    InputTypeInfo.Password,
-                    keyboardActions = KeyboardActions(onDone = {
-                        focusManager.clearFocus()
-                        quoteViewModel.sendMessage("Algo salió mal, ¡inténtalo de nuevo más tarde!")
-                    }),
-                    focusRequester = passwordFocusRequester,
-                    onTextFieldChange = {
-                        quoteViewModel.onLoginChanged(
-                            email = email,
-                            password = it
-                        )
-                    },
-                )
-                LoginButton(
-                    isEnabled = loginEnabled,
-                    onClick =
-                    {
-                        quoteViewModel.sendMessage("Algo salió mal, ¡inténtalo de nuevo más tarde!")
-                        coroutineScope.launch {
-                            quoteViewModel.onLoginSelected()
-                        }
+            )
+            TextInput(
+                value = email,
+                InputTypeInfo.Name,
+                keyboardActions = KeyboardActions(onNext = {
+                    passwordFocusRequester.requestFocus()
+                }),
+                onTextFieldChange = {
+                    quoteViewModel.onLoginChanged(
+                        email = it, password = password
+                    )
+                },
+            )
+            TextInput(
+                value = password,
+                InputTypeInfo.Password,
+                keyboardActions = KeyboardActions(onDone = {
+                    focusManager.clearFocus()
+                    coroutineScope.launch {
+                        quoteViewModel.onLoginSuccess()
                     }
-                )
-                Divider(
-                    color = Color.White.copy(alpha = 0.3f),
-                    thickness = 1.dp,
-                    modifier = Modifier.padding(top = 48.dp)
-                )
-                Row(verticalAlignment = Alignment.CenterVertically) {
+                }),
+                focusRequester = passwordFocusRequester,
+                onTextFieldChange = {
+                    quoteViewModel.onLoginChanged(
+                        email = email, password = it
+                    )
+                },
+            )
+            if (isLoading) {
+                Box {
+                    CircularProgressIndicator(Modifier.align(Alignment.Center))
+                }
+            } else {
+                LoginButton(isEnabled = loginEnabled, onClick = {
+                    focusManager.clearFocus()
+                    coroutineScope.launch {
+                        quoteViewModel.onLoginSuccess()
+                    }
+                })
+            }
+
+
+            Divider(
+                color = Color.White.copy(alpha = 0.3f),
+                thickness = 1.dp,
+                modifier = Modifier.padding(top = 48.dp)
+            )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                TextButton(onClick = {
+                    coroutineScope.launch {
+                        quoteViewModel.onLoginError()
+                    }
+                }) {
                     Text(BasicValues.notHave_Account, color = Color.White)
-                    TextButton(onClick = {}) {
-                        Text(BasicValues.singUp)
-                    }
+                }
+                TextButton(onClick = {
+                    focusManager.clearFocus()
+                    quoteViewModel.sendMessage(BasicValues.singUp)
+
+                }) {
+                    Text(BasicValues.singUp)
                 }
             }
         }
@@ -170,8 +203,7 @@ fun Login(quoteViewModel: LoginViewModel = hiltViewModel()) {
 
 @Composable
 fun LoginButton(
-    isEnabled: Boolean,
-    onClick: () -> Unit
+    isEnabled: Boolean, onClick: () -> Unit
 ) {
     Button(onClick = onClick, modifier = Modifier.fillMaxWidth(), enabled = isEnabled) {
         Text(BasicValues.signIn, Modifier.padding(vertical = 8.dp))

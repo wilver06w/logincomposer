@@ -9,5 +9,7 @@ class BasicValues {
          const val notHave_Account = "¿No tienes una cuenta?"
          const val singUp = "REGISTRATE"
          const val signIn = "Iniciar Sesión"
+         const val signSuccess = "Sesión iniciada"
+         const val failedRequest = "Fallo la peticion"
      }
  }
