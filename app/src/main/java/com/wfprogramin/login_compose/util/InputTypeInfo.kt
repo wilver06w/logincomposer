@@ -17,21 +17,19 @@ sealed class InputTypeInfo(
     val visualTransformation: VisualTransformation
 ) {
     data object Name : InputTypeInfo(
-        label = "UserName",
+        label = BasicValues.userName,
         icon = Icons.Default.Person,
         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
         visualTransformation = VisualTransformation.None
-
     )
 
-    data  object Password : InputTypeInfo(
-        label = "Password",
+    data object Password : InputTypeInfo(
+        label = BasicValues.password,
         icon = Icons.Default.Lock,
         keyboardOptions = KeyboardOptions(
             imeAction = ImeAction.Done,
             keyboardType = KeyboardType.Password
         ),
         visualTransformation = PasswordVisualTransformation()
-
-        )
+    )
 }
